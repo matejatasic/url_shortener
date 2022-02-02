@@ -4,3 +4,7 @@ body {
   color: white;
   font-family: "Roboto", sans-serif;
 }
+
+#alertDiv {
+  display: none;
+}
