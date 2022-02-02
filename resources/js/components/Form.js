@@ -12,7 +12,7 @@ export default function Form({action, checkInput, setAlert, user, handleChange, 
         const email = document.getElementById('email').value;
         const password = document.getElementById('password').value;
 
-        if(checkInput({name: name, email: email, password: password})) {
+        if(checkInput({name: name, email: email, password: password, url: 'empty', date: 'empty'})) {
             if(action === 'register') {
                 axios.post('/api/register', {
                     name: name, 
@@ -38,7 +38,7 @@ export default function Form({action, checkInput, setAlert, user, handleChange, 
                 })
                 .then(res => {
                     if(res.data.success === 'success') {
-                       handleChange(res.data.user);
+                       handleChange('user', res.data.user);
                        setUserInStorage(res.data.user);
                        return navigation('/');
                     }

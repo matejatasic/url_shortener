@@ -3,8 +3,13 @@ body {
   background: linear-gradient(120deg, #006cfa 0%, #4091fc 100%);
   color: white;
   font-family: "Roboto", sans-serif;
+  min-height: 100vh;
 }
 
 #alertDiv {
+  display: none;
+}
+
+#resultDiv {
   display: none;
 }

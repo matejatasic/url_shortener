@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from 'react-router-dom';
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
@@ -14,6 +14,15 @@ export default function Navbar({user, handleChange, setAlert, removeUserFromStor
             if(res.data === 'success') {
                 handleChange('');
                 removeUserFromStorage();
+                document.getElementById('navbar-right').innerHTML = `
+                    <li className="nav-item">
+                        <a href="/login" class="nav-link">Login</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="/register" class="nav-link">Register</a>
+                    </li>   
+                `;
+
                 return navigation('/');
             }
         })
@@ -35,10 +44,12 @@ export default function Navbar({user, handleChange, setAlert, removeUserFromStor
 
                 <div className="collapse navbar-collapse" id="navbarSupportedContent">
                     <ul className="navbar-nav mr-auto">
-                        
+                        <li className="nav-item">
+                            <Link to="/url-list" className="nav-link">Your URLs</Link>    
+                        </li>     
                     </ul>
 
-                    <ul className="navbar-nav ml-auto">
+                    <ul id="navbar-right" className="navbar-nav ml-auto">
                         {typeof(user) === 'object' ? 
                             (
                                 <>
