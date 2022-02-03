@@ -25,9 +25,9 @@ export default function Main({user, checkInput, handleChange, setTinyUrlInStorag
 
         let tinyUrl = getRandomChars();
 
-        if(checkInput({name: 'empty', email: 'empty', password: 'empty', url: input, date: date})) {
+        if(checkInput({name: 'empty', email: 'empty', password: 'empty', url: input, expiration_date: date})) {
             let tempInput = input.indexOf('http://') !== -1 ? input : 'http://' + input;
-            let url = {url: tempInput, tinyUrl: tinyUrl, date: date};
+            let url = {url: tempInput, tiny_url: tinyUrl, expiration_date: date};
 
             // If user is not logged in
             if(typeof(user) !== 'object') {

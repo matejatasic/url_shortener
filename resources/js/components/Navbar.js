@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Link } from 'react-router-dom';
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from 'react-router-dom';
 import axios from "axios";
 
 export default function Navbar({user, handleChange, setAlert, removeUserFromStorage}) {
@@ -8,11 +7,11 @@ export default function Navbar({user, handleChange, setAlert, removeUserFromStor
 
     const handleLogout = (e) => {
         e.preventDefault();
-
+        
         axios.post('/api/logout')
         .then(res => {
             if(res.data === 'success') {
-                handleChange('');
+                handleChange('user', '');
                 removeUserFromStorage();
                 document.getElementById('navbar-right').innerHTML = `
                     <li className="nav-item">

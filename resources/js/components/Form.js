@@ -12,7 +12,7 @@ export default function Form({action, checkInput, setAlert, user, handleChange, 
         const email = document.getElementById('email').value;
         const password = document.getElementById('password').value;
 
-        if(checkInput({name: name, email: email, password: password, url: 'empty', date: 'empty'})) {
+        if(checkInput({name: name, email: email, password: password, url: 'empty', expiration_date: 'empty'})) {
             if(action === 'register') {
                 axios.post('/api/register', {
                     name: name, 
