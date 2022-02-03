@@ -30,6 +30,21 @@ class UrlController extends Controller
         ]);
     }
 
+    public function checkUrl(Request $request) {
+        $url = Url::where('tiny_url', $request->url)->get()->count();
+
+        if($url === 0) {
+            return response()->json('success');
+        }
+        else {
+            return response()->json([
+                'errors' => [
+                    'url' => 'The url has already been taken!',
+                    ]
+            ], 422);
+        }
+    }
+
     public function editUrl(Request $request) {
         $this->validate($request, [
             'url' => 'required',

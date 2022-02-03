@@ -1,4 +1,5 @@
 import axios from "axios";
+import { filter } from "lodash";
 import React, { useState } from "react";
 
 export default function Main({user, checkInput, handleChange, setTinyUrlInStorage, setAlert}) {
@@ -8,6 +9,32 @@ export default function Main({user, checkInput, handleChange, setTinyUrlInStorag
     const handleInputChange = (target, e) => {
         if(target === 'input') setInput(e.target.value);
         else setDate(e.target.value);
+    }
+    const checkIfUrlInDatabase = (url) => {
+        let urlsInStorage = JSON.parse(localStorage.getItem('urls')).filter(storageUrl => storageUrl.tiny_url === url).length;
+        let result = true;
+
+        if(urlsInStorage === 0) {
+            axios.post('/api/checkUrl', {
+                url: url,
+            })
+            .then(res => {
+                
+            })
+            .catch(error => {
+                console.log(error);
+                setAlert('error', '<p>The url is already taken, please try again.</p>');
+                
+                result = false;
+            })
+        }
+        else {
+            setAlert('error', '<p>The url is already taken, please try again.</p>');
+                
+            result = false;
+        }
+
+        return result;
     }
     const getRandomChars = () => {
         let possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -24,8 +51,8 @@ export default function Main({user, checkInput, handleChange, setTinyUrlInStorag
         e.preventDefault()
 
         let tinyUrl = getRandomChars();
-
-        if(checkInput({name: 'empty', email: 'empty', password: 'empty', url: input, expiration_date: date})) {
+        
+        if(checkInput({name: 'empty', email: 'empty', password: 'empty', url: input, expiration_date: date}) && checkIfUrlInDatabase(tinyUrl)) {
             let tempInput = input.indexOf('http://') !== -1 ? input : 'http://' + input;
             let url = {url: tempInput, tiny_url: tinyUrl, expiration_date: date};
 

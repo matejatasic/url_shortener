@@ -24,6 +24,7 @@ Route::post('/register', [AuthController::class, 'register']);
 Route::post('/logout', [AuthController::class, 'logout']);
 
 Route::post('/addUrl', [UrlController::class, 'addUrl']);
+Route::post('/checkUrl', [UrlController::class, 'checkUrl']);
 Route::post('/editUrl', [UrlController::class, 'editUrl']);
 Route::post('/removeUrl', [UrlController::class, 'removeUrl']);
 Route::post('/save', [UrlController::class, 'saveToDatabase']);
