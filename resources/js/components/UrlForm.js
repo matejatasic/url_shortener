@@ -27,7 +27,7 @@ export default function UrlForm({editDetails, handleDetails, setAlert, editTinyU
                     handleDetails('');
                     editTinyUrlInStorage(res.data.url);
 
-                    navigation('/url-list');
+                    return navigation('/url-list');
                 } 
             })
             .catch(error => {

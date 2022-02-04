@@ -42,6 +42,24 @@ function App() {
         setUrls(tempUrls);
         localStorage.setItem('urls', JSON.stringify(tempUrls));
     }
+    const setUrlsFromDBtoStorage = (user) => {
+        axios.post('/api/getDBUrls', {
+            user_id: user.id,
+        })
+        .then(res => {
+            if(res.data.success === 'success') {
+                res.data.urls.forEach(url => setTinyUrlInStorage(url));
+            }
+        })
+        .catch(error => {
+            console.log(erorr);
+        })
+    }
+    const removeDBUrlsfromStorage = () => {
+        let tempUrls = JSON.parse(localStorage.getItem('urls')).filter(storageUrl => !storageUrl.hasOwnProperty('id'));
+        setUrls(tempUrls);
+        localStorage.setItem('urls', JSON.stringify(tempUrls));
+    }
     const setAlert = (result, messages) => {
         const alertDiv = document.getElementById('alertDiv');
     
@@ -61,11 +79,10 @@ function App() {
             alertDiv.innerHTML = '';
         }, 8000)
     }
-
     const checkInput = (inputs) => {
         let alerts = '';
         
-        if(!inputs['name'].trim() || !inputs['email'].trim() || !inputs['password'].trim() || !inputs['url'].trim() || !inputs['expiration_date'].trim()) {
+        if(!inputs['name'].trim() || !inputs['email'].trim() || !inputs['password'].trim() || !inputs['url'].trim() || !inputs['expiration_date'].trim() || !inputs['rate_limit'].trim()) {
             alerts += '<p>Please fill out all the fields!</p>'; 
         }
         if(inputs['email'] !== 'empty' && !/\S+@\S+\.\S+/.test(inputs['email'])) {
@@ -96,12 +113,12 @@ function App() {
         }
         else return true;
     }
-    const handleRemove = (e) => {
-        let urlInDatabase = urls.find(url => url.tiny_url === e.target.id && url.hasOwnProperty('id')).length === 1 ? true : false;
+    const handleRemove = (url) => {
+        let urlInDatabase = urls.find(storageUrl => storageUrl.tiny_url === url && storageUrl.hasOwnProperty('id')) !== undefined ? true : false;
         
         if(typeof(user) === 'object' && urlInDatabase) {
             axios.post('/api/removeUrl', {
-                id: e.target.id
+                tiny_url: url,
             })
             .then(res => {
                 
@@ -112,19 +129,19 @@ function App() {
             });
         }
         
-        let tempUrls = JSON.parse(localStorage.getItem('urls')).filter(url => url.tiny_url !== e.target.id);
+        let tempUrls = JSON.parse(localStorage.getItem('urls')).filter(storageUrl => storageUrl.tiny_url !== url);
         setUrls(tempUrls);
         localStorage.setItem('urls', JSON.stringify(tempUrls));
     }
 
     return (
         <React.Fragment>
-            <Navbar user={user} handleChange={handleChange} setAlert={setAlert} removeUserFromStorage={removeUserFromStorage} />
+            <Navbar user={user} handleChange={handleChange} setAlert={setAlert} removeUserFromStorage={removeUserFromStorage} removeDBUrlsfromStorage={removeDBUrlsfromStorage} />
             <div className="container mt-3">
                 <Routes>
                     <Route path="/" exact element={<Main user={user} checkInput={checkInput} handleChange={handleChange} setTinyUrlInStorage={setTinyUrlInStorage} setAlert={setAlert} />} />
                     <Route path="/url-list" element={<UrlList urls={urls} user={user} handleRemove={handleRemove} handleDetails={handleDetails} setAlert={setAlert} editTinyUrlInStorage={editTinyUrlInStorage} />} />
-                    <Route path="/login" element={<Form action="login" checkInput={checkInput} setAlert={setAlert} user={user} handleChange={handleChange} setUserInStorage={setUserInStorage} />} />
+                    <Route path="/login" element={<Form action="login" checkInput={checkInput} setAlert={setAlert} user={user} handleChange={handleChange} setUserInStorage={setUserInStorage} setUrlsFromDBtoStorage={setUrlsFromDBtoStorage} />} />
                     <Route path="/register" element={<Form action="register" checkInput={checkInput} setAlert={setAlert} />} />
                     <Route path="/edit-url" element={<UrlForm editDetails={editDetails} handleDetails={handleDetails} setAlert={setAlert} editTinyUrlInStorage={editTinyUrlInStorage} />} />
                 </Routes>

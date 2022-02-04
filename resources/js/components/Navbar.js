@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from 'react-router-dom';
 import axios from "axios";
 
-export default function Navbar({user, handleChange, setAlert, removeUserFromStorage}) {
+export default function Navbar({user, handleChange, setAlert, removeUserFromStorage, removeDBUrlsfromStorage}) {
     let navigation = useNavigate();
 
     const handleLogout = (e) => {
@@ -13,6 +13,8 @@ export default function Navbar({user, handleChange, setAlert, removeUserFromStor
             if(res.data === 'success') {
                 handleChange('user', '');
                 removeUserFromStorage();
+                removeDBUrlsfromStorage();
+                
                 document.getElementById('navbar-right').innerHTML = `
                     <li className="nav-item">
                         <a href="/login" class="nav-link">Login</a>

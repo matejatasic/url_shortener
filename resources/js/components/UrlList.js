@@ -13,7 +13,7 @@ export default function UrlList({urls, user, handleRemove, handleDetails, setAle
             if(res.data.success) {
                 editTinyUrlInStorage(res.data.url);
 
-                navigation('/url-list');
+                return navigation('/url-list');
             }
         })
         .catch(error => {
@@ -21,12 +21,46 @@ export default function UrlList({urls, user, handleRemove, handleDetails, setAle
             setAlert('error', '<p>There was a problem while trying to save the url to the database!</p>');
         })
     }
+
+    const reduceVisitCount = (url) => {
+        if(user.id === url.user_id && url.hasOwnProperty('id') && url.rate_limit !== null) {
+            axios.post('/api/reduceVisitCount', {
+                id: url.id,
+            })
+            .then(res => {
+                if(res.data.expired === true) {
+                    handleRemove(res.data.url.tiny_url);
+                }
+                else {
+                    editTinyUrlInStorage(res.data.url);
+                } 
+
+                return navigation('/url-list');
+            })
+            .catch(error => {
+                console.log(error);
+            });
+        }
+        else {
+            url['rate_limit']--;
+            
+            if(url['rate_limit'] === 0) {
+                handleRemove(url.tiny_url);
+            }
+            else {
+                editTinyUrlInStorage(url);
+            }
+
+            return navigation('/url-list');
+        }
+    }
+
     return (
         <div className="row mt-5">
             <div className="col-md-12 text-center">
                 <h1>You URLs</h1>
             </div>
-            <div className="col-md-8">
+            <div className="col-md-8 mx-auto">
                 <div id="alertDiv"></div>
             </div>
             <div className="col-md-8 mx-auto mt-5">
@@ -39,9 +73,11 @@ export default function UrlList({urls, user, handleRemove, handleDetails, setAle
                             <div className="card mb-3">
                                 <div className="row no-gutters text-dark">
                                     <div className="col-md-4 p-3">
-                                        <h5><a href={url.url} target="_blank">{url.tiny_url}</a></h5>
+                                        <h5><a href={url.url} target="_blank" onClick={() => reduceVisitCount(url)}>{url.tiny_url}</a></h5>
                                         <p className="text-secondary">{url.url}</p>
-                                        <small>Expiration date: {url.expiration_date}</small>
+                                        <small>Expiration date: {url.expiration_date === null ? 'Empty' : url.expiration_date}</small>
+                                        <br />
+                                        <small>Rate limit: {url.rate_limit === null ? 'Empty' : url.rate_limit}</small>
                                     </div>
                                     <div className="col-md-8">
                                         <div className="card-body d-flex justify-content-between pt-5">
@@ -77,21 +113,22 @@ export default function UrlList({urls, user, handleRemove, handleDetails, setAle
                                             }
                                             {typeof(user) === 'object' && url.hasOwnProperty('id') ? 
                                                 (
-                                                    <button id={url.tiny_url} className="btn btn-danger" onClick={(e) => handleRemove(e)}>Remove</button>
+                                                    <button id={url.tiny_url} className="btn btn-danger" onClick={(e) => handleRemove(e.target.id)}>Remove</button>
                                                 ) : 
                                                 (
                                                     typeof(user) === 'object' && !url.hasOwnProperty('id') ? 
                                                         (
-                                                            <button id={url.tiny_url} className="btn btn-danger" onClick={(e) => handleRemove(e)}>Remove</button>     
+                                                            <button id={url.tiny_url} className="btn btn-danger" onClick={(e) => handleRemove(e.target.id)}>Remove</button>     
                                                         ) :
                                                         (
-                                                            typeof(user) !== 'object' && !url.hasOwnProperty('id')) ?
+                                                            typeof(user) !== 'object' && !url.hasOwnProperty('id') ?
                                                                 (
-                                                                    <button id={url.tiny_url} className="btn btn-danger" onClick={(e) => handleRemove(e)}>Remove</button>
+                                                                    <button id={url.tiny_url} className="btn btn-danger" onClick={(e) => handleRemove(e.target.id)}>Remove</button>
                                                                 ) :
                                                                 (
                                                                     <button id={url.tiny_url} className="btn btn-danger" disabled title="You must be logged in to delete this url">Remove</button>
                                                                 )
+                                                        )
                                                 ) 
                                             }
                                         </div>

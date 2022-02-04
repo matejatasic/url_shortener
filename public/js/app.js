@@ -2179,6 +2179,28 @@ function App() {
     localStorage.setItem('urls', JSON.stringify(tempUrls));
   };
 
+  var setUrlsFromDBtoStorage = function setUrlsFromDBtoStorage(user) {
+    axios__WEBPACK_IMPORTED_MODULE_7___default().post('/api/getDBUrls', {
+      user_id: user.id
+    }).then(function (res) {
+      if (res.data.success === 'success') {
+        res.data.urls.forEach(function (url) {
+          return setTinyUrlInStorage(url);
+        });
+      }
+    })["catch"](function (error) {
+      console.log(erorr);
+    });
+  };
+
+  var removeDBUrlsfromStorage = function removeDBUrlsfromStorage() {
+    var tempUrls = JSON.parse(localStorage.getItem('urls')).filter(function (storageUrl) {
+      return !storageUrl.hasOwnProperty('id');
+    });
+    setUrls(tempUrls);
+    localStorage.setItem('urls', JSON.stringify(tempUrls));
+  };
+
   var setAlert = function setAlert(result, messages) {
     var alertDiv = document.getElementById('alertDiv');
 
@@ -2201,7 +2223,7 @@ function App() {
   var checkInput = function checkInput(inputs) {
     var alerts = '';
 
-    if (!inputs['name'].trim() || !inputs['email'].trim() || !inputs['password'].trim() || !inputs['url'].trim() || !inputs['expiration_date'].trim()) {
+    if (!inputs['name'].trim() || !inputs['email'].trim() || !inputs['password'].trim() || !inputs['url'].trim() || !inputs['expiration_date'].trim() || !inputs['rate_limit'].trim()) {
       alerts += '<p>Please fill out all the fields!</p>';
     }
 
@@ -2235,22 +2257,22 @@ function App() {
     } else return true;
   };
 
-  var handleRemove = function handleRemove(e) {
-    var urlInDatabase = urls.find(function (url) {
-      return url.tiny_url === e.target.id && url.hasOwnProperty('id');
-    }).length === 1 ? true : false;
+  var handleRemove = function handleRemove(url) {
+    var urlInDatabase = urls.find(function (storageUrl) {
+      return storageUrl.tiny_url === url && storageUrl.hasOwnProperty('id');
+    }) !== undefined ? true : false;
 
     if (_typeof(user) === 'object' && urlInDatabase) {
       axios__WEBPACK_IMPORTED_MODULE_7___default().post('/api/removeUrl', {
-        id: e.target.id
+        tiny_url: url
       }).then(function (res) {})["catch"](function (error) {
         console.log(error);
         setAlert('error', '<p>There was a problem while trying to remove the url!</p>');
       });
     }
 
-    var tempUrls = JSON.parse(localStorage.getItem('urls')).filter(function (url) {
-      return url.tiny_url !== e.target.id;
+    var tempUrls = JSON.parse(localStorage.getItem('urls')).filter(function (storageUrl) {
+      return storageUrl.tiny_url !== url;
     });
     setUrls(tempUrls);
     localStorage.setItem('urls', JSON.stringify(tempUrls));
@@ -2261,7 +2283,8 @@ function App() {
       user: user,
       handleChange: handleChange,
       setAlert: setAlert,
-      removeUserFromStorage: removeUserFromStorage
+      removeUserFromStorage: removeUserFromStorage,
+      removeDBUrlsfromStorage: removeDBUrlsfromStorage
     }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)("div", {
       className: "container mt-3",
       children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsxs)(react_router_dom__WEBPACK_IMPORTED_MODULE_9__.Routes, {
@@ -2293,7 +2316,8 @@ function App() {
             setAlert: setAlert,
             user: user,
             handleChange: handleChange,
-            setUserInStorage: setUserInStorage
+            setUserInStorage: setUserInStorage,
+            setUrlsFromDBtoStorage: setUrlsFromDBtoStorage
           })
         }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)(react_router_dom__WEBPACK_IMPORTED_MODULE_9__.Route, {
           path: "/register",
@@ -2353,7 +2377,8 @@ function Form(_ref) {
       setAlert = _ref.setAlert,
       user = _ref.user,
       handleChange = _ref.handleChange,
-      setUserInStorage = _ref.setUserInStorage;
+      setUserInStorage = _ref.setUserInStorage,
+      setUrlsFromDBtoStorage = _ref.setUrlsFromDBtoStorage;
   var navigation = (0,react_router_dom__WEBPACK_IMPORTED_MODULE_3__.useNavigate)();
 
   var handleClick = function handleClick(e) {
@@ -2367,7 +2392,8 @@ function Form(_ref) {
       email: email,
       password: password,
       url: 'empty',
-      expiration_date: 'empty'
+      expiration_date: 'empty',
+      rate_limit: 'empty'
     })) {
       if (action === 'register') {
         axios__WEBPACK_IMPORTED_MODULE_1___default().post('/api/register', {
@@ -2391,6 +2417,7 @@ function Form(_ref) {
           if (res.data.success === 'success') {
             handleChange('user', res.data.user);
             setUserInStorage(res.data.user);
+            setUrlsFromDBtoStorage(res.data.user);
             return navigation('/');
           }
         })["catch"](function (error) {
@@ -2511,19 +2538,29 @@ function Main(_ref) {
       input = _useState2[0],
       setInput = _useState2[1];
 
-  var _useState3 = (0,react__WEBPACK_IMPORTED_MODULE_2__.useState)(''),
+  var _useState3 = (0,react__WEBPACK_IMPORTED_MODULE_2__.useState)('empty'),
       _useState4 = _slicedToArray(_useState3, 2),
       date = _useState4[0],
       setDate = _useState4[1];
 
+  var _useState5 = (0,react__WEBPACK_IMPORTED_MODULE_2__.useState)('empty'),
+      _useState6 = _slicedToArray(_useState5, 2),
+      rateLimit = _useState6[0],
+      setRateLimit = _useState6[1];
+
+  var _useState7 = (0,react__WEBPACK_IMPORTED_MODULE_2__.useState)(false),
+      _useState8 = _slicedToArray(_useState7, 2),
+      expirationByLimit = _useState8[0],
+      setExpirationByLimit = _useState8[1];
+
   var handleInputChange = function handleInputChange(target, e) {
-    if (target === 'input') setInput(e.target.value);else setDate(e.target.value);
+    if (target === 'input') setInput(e.target.value);else if (target === 'date') setDate(e.target.value);else setRateLimit(e.target.value);
   };
 
   var checkIfUrlInDatabase = function checkIfUrlInDatabase(url) {
-    var urlsInStorage = JSON.parse(localStorage.getItem('urls')).filter(function (storageUrl) {
+    var urlsInStorage = localStorage.hasOwnProperty('urls') ? JSON.parse(localStorage.getItem('urls')).filter(function (storageUrl) {
       return storageUrl.tiny_url === url;
-    }).length;
+    }).length : 0;
     var result = true;
 
     if (urlsInStorage === 0) {
@@ -2563,13 +2600,15 @@ function Main(_ref) {
       email: 'empty',
       password: 'empty',
       url: input,
-      expiration_date: date
+      expiration_date: date,
+      rate_limit: rateLimit
     }) && checkIfUrlInDatabase(tinyUrl)) {
       var tempInput = input.indexOf('http://') !== -1 ? input : 'http://' + input;
       var url = {
         url: tempInput,
         tiny_url: tinyUrl,
-        expiration_date: date
+        expiration_date: date,
+        rate_limit: rateLimit
       }; // If user is not logged in
 
       if (_typeof(user) !== 'object') {
@@ -2631,8 +2670,34 @@ function Main(_ref) {
               }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("input", {
                 type: "date",
                 className: "form-control",
+                disabled: expirationByLimit,
                 onChange: function onChange(e) {
                   return handleInputChange('date', e);
+                }
+              })]
+            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsxs)("div", {
+              className: "form-check my-3",
+              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("input", {
+                className: "form-check-input",
+                type: "checkbox",
+                defaultChecked: expirationByLimit,
+                onClick: function onClick() {
+                  return setExpirationByLimit(!expirationByLimit);
+                }
+              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("label", {
+                className: "form-check-label",
+                children: "Make url expiration by rate limit"
+              })]
+            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsxs)("div", {
+              className: "form-group",
+              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("label", {
+                children: "Rate limit"
+              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("input", {
+                type: "number",
+                disabled: expirationByLimit === false,
+                className: "form-control",
+                onChange: function onChange(e) {
+                  return handleInputChange('rate', e);
                 }
               })]
             }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("button", {
@@ -2681,7 +2746,8 @@ function Navbar(_ref) {
   var user = _ref.user,
       handleChange = _ref.handleChange,
       setAlert = _ref.setAlert,
-      removeUserFromStorage = _ref.removeUserFromStorage;
+      removeUserFromStorage = _ref.removeUserFromStorage,
+      removeDBUrlsfromStorage = _ref.removeDBUrlsfromStorage;
   var navigation = (0,react_router_dom__WEBPACK_IMPORTED_MODULE_3__.useNavigate)();
 
   var handleLogout = function handleLogout(e) {
@@ -2690,6 +2756,7 @@ function Navbar(_ref) {
       if (res.data === 'success') {
         handleChange('user', '');
         removeUserFromStorage();
+        removeDBUrlsfromStorage();
         document.getElementById('navbar-right').innerHTML = "\n                    <li className=\"nav-item\">\n                        <a href=\"/login\" class=\"nav-link\">Login</a>\n                    </li>\n                    <li class=\"nav-item\">\n                        <a href=\"/register\" class=\"nav-link\">Register</a>\n                    </li>   \n                ";
         return navigation('/');
       }
@@ -2846,7 +2913,7 @@ function UrlForm(_ref) {
         if (res.data.success === 'success') {
           handleDetails('');
           editTinyUrlInStorage(res.data.url);
-          navigation('/url-list');
+          return navigation('/url-list');
         }
       })["catch"](function (error) {
         console.log(error);
@@ -2970,12 +3037,40 @@ function UrlList(_ref) {
     axios__WEBPACK_IMPORTED_MODULE_1___default().post('/api/save', url).then(function (res) {
       if (res.data.success) {
         editTinyUrlInStorage(res.data.url);
-        navigation('/url-list');
+        return navigation('/url-list');
       }
     })["catch"](function (error) {
       console.log(error);
       setAlert('error', '<p>There was a problem while trying to save the url to the database!</p>');
     });
+  };
+
+  var reduceVisitCount = function reduceVisitCount(url) {
+    if (user.id === url.user_id && url.hasOwnProperty('id') && url.rate_limit !== null) {
+      axios__WEBPACK_IMPORTED_MODULE_1___default().post('/api/reduceVisitCount', {
+        id: url.id
+      }).then(function (res) {
+        if (res.data.expired === true) {
+          handleRemove(res.data.url.tiny_url);
+        } else {
+          editTinyUrlInStorage(res.data.url);
+        }
+
+        return navigation('/url-list');
+      })["catch"](function (error) {
+        console.log(error);
+      });
+    } else {
+      url['rate_limit']--;
+
+      if (url['rate_limit'] === 0) {
+        handleRemove(url.tiny_url);
+      } else {
+        editTinyUrlInStorage(url);
+      }
+
+      return navigation('/url-list');
+    }
   };
 
   return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsxs)("div", {
@@ -2986,7 +3081,7 @@ function UrlList(_ref) {
         children: "You URLs"
       })
     }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("div", {
-      className: "col-md-8",
+      className: "col-md-8 mx-auto",
       children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("div", {
         id: "alertDiv"
       })
@@ -3005,13 +3100,18 @@ function UrlList(_ref) {
                 children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("a", {
                   href: url.url,
                   target: "_blank",
+                  onClick: function onClick() {
+                    return reduceVisitCount(url);
+                  },
                   children: url.tiny_url
                 })
               }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("p", {
                 className: "text-secondary",
                 children: url.url
               }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsxs)("small", {
-                children: ["Expiration date: ", url.expiration_date]
+                children: ["Expiration date: ", url.expiration_date === null ? 'Empty' : url.expiration_date]
+              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("br", {}), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsxs)("small", {
+                children: ["Rate limit: ", url.rate_limit === null ? 'Empty' : url.rate_limit]
               })]
             }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("div", {
               className: "col-md-8",
@@ -3059,21 +3159,21 @@ function UrlList(_ref) {
                   id: url.tiny_url,
                   className: "btn btn-danger",
                   onClick: function onClick(e) {
-                    return handleRemove(e);
+                    return handleRemove(e.target.id);
                   },
                   children: "Remove"
                 }) : _typeof(user) === 'object' && !url.hasOwnProperty('id') ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("button", {
                   id: url.tiny_url,
                   className: "btn btn-danger",
                   onClick: function onClick(e) {
-                    return handleRemove(e);
+                    return handleRemove(e.target.id);
                   },
                   children: "Remove"
                 }) : _typeof(user) !== 'object' && !url.hasOwnProperty('id') ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("button", {
                   id: url.tiny_url,
                   className: "btn btn-danger",
                   onClick: function onClick(e) {
-                    return handleRemove(e);
+                    return handleRemove(e.target.id);
                   },
                   children: "Remove"
                 }) : /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("button", {

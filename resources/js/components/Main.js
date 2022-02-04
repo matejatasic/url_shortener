@@ -4,14 +4,17 @@ import React, { useState } from "react";
 
 export default function Main({user, checkInput, handleChange, setTinyUrlInStorage, setAlert}) {
     const [input, setInput] = useState('');
-    const [date, setDate] = useState('');
+    const [date, setDate] = useState('empty');
+    const [rateLimit, setRateLimit] = useState('empty');
+    const [expirationByLimit, setExpirationByLimit] = useState(false);
 
     const handleInputChange = (target, e) => {
         if(target === 'input') setInput(e.target.value);
-        else setDate(e.target.value);
+        else if(target === 'date') setDate(e.target.value);
+        else setRateLimit(e.target.value);
     }
     const checkIfUrlInDatabase = (url) => {
-        let urlsInStorage = JSON.parse(localStorage.getItem('urls')).filter(storageUrl => storageUrl.tiny_url === url).length;
+        let urlsInStorage = localStorage.hasOwnProperty('urls') ? JSON.parse(localStorage.getItem('urls')).filter(storageUrl => storageUrl.tiny_url === url).length : 0;
         let result = true;
 
         if(urlsInStorage === 0) {
@@ -51,11 +54,11 @@ export default function Main({user, checkInput, handleChange, setTinyUrlInStorag
         e.preventDefault()
 
         let tinyUrl = getRandomChars();
-        
-        if(checkInput({name: 'empty', email: 'empty', password: 'empty', url: input, expiration_date: date}) && checkIfUrlInDatabase(tinyUrl)) {
-            let tempInput = input.indexOf('http://') !== -1 ? input : 'http://' + input;
-            let url = {url: tempInput, tiny_url: tinyUrl, expiration_date: date};
 
+        if(checkInput({name: 'empty', email: 'empty', password: 'empty', url: input, expiration_date: date, rate_limit: rateLimit}) && checkIfUrlInDatabase(tinyUrl)) {
+            let tempInput = input.indexOf('http://') !== -1 ? input : 'http://' + input;
+            let url = {url: tempInput, tiny_url: tinyUrl, expiration_date: date, rate_limit: rateLimit};
+            
             // If user is not logged in
             if(typeof(user) !== 'object') {
                 handleChange('urls', url);
@@ -79,7 +82,7 @@ export default function Main({user, checkInput, handleChange, setTinyUrlInStorag
                     setAlert('error', '<p>There was a problem while trying to shorten the url!</p>');
                 });
             }
-        
+            
             document.getElementById('form').reset();
         }
     }
@@ -100,7 +103,17 @@ export default function Main({user, checkInput, handleChange, setTinyUrlInStorag
                             </div>
                             <div className="form-group">
                                 <label>Expiration date</label>
-                                <input type="date" className="form-control" onChange={(e) => handleInputChange('date', e)}/>
+                                <input type="date" className="form-control" disabled={expirationByLimit} onChange={(e) => handleInputChange('date', e)}/>
+                            </div>
+                            <div className="form-check my-3">
+                                <input className="form-check-input" type="checkbox" defaultChecked={expirationByLimit} onClick={() => setExpirationByLimit(!expirationByLimit)} />
+                                <label className="form-check-label">
+                                    Make url expiration by rate limit
+                                </label>
+                            </div>
+                            <div className="form-group">
+                                <label>Rate limit</label>
+                                <input type="number" disabled={expirationByLimit === false} className="form-control" onChange={(e) => handleInputChange('rate', e)}/>
                             </div>
                             <button type="submit" className="btn btn-success mt-2" onClick={(e) => handleClick(e)}>Submit</button>
                         </form>

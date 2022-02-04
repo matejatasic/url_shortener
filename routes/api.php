@@ -27,4 +27,6 @@ Route::post('/addUrl', [UrlController::class, 'addUrl']);
 Route::post('/checkUrl', [UrlController::class, 'checkUrl']);
 Route::post('/editUrl', [UrlController::class, 'editUrl']);
 Route::post('/removeUrl', [UrlController::class, 'removeUrl']);
+Route::post('/reduceVisitCount', [UrlController::class, 'reduceVisitCount']);
 Route::post('/save', [UrlController::class, 'saveToDatabase']);
+Route::post('/getDBUrls', [UrlController::class, 'getDBUrls']);
