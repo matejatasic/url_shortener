@@ -140,7 +140,7 @@ function App() {
             <div className="container mt-3">
                 <Routes>
                     <Route path="/" exact element={<Main user={user} checkInput={checkInput} handleChange={handleChange} setTinyUrlInStorage={setTinyUrlInStorage} setAlert={setAlert} />} />
-                    <Route path="/url-list" element={<UrlList urls={urls} user={user} handleRemove={handleRemove} handleDetails={handleDetails} setAlert={setAlert} editTinyUrlInStorage={editTinyUrlInStorage} />} />
+                    <Route path="/url-list" element={<UrlList user={user} handleRemove={handleRemove} handleDetails={handleDetails} setAlert={setAlert} editTinyUrlInStorage={editTinyUrlInStorage} />} />
                     <Route path="/login" element={<Form action="login" checkInput={checkInput} setAlert={setAlert} user={user} handleChange={handleChange} setUserInStorage={setUserInStorage} setUrlsFromDBtoStorage={setUrlsFromDBtoStorage} />} />
                     <Route path="/register" element={<Form action="register" checkInput={checkInput} setAlert={setAlert} />} />
                     <Route path="/edit-url" element={<UrlForm editDetails={editDetails} handleDetails={handleDetails} setAlert={setAlert} editTinyUrlInStorage={editTinyUrlInStorage} />} />

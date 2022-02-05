@@ -2,8 +2,9 @@ import React from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 
-export default function UrlList({urls, user, handleRemove, handleDetails, setAlert, editTinyUrlInStorage}) {
+export default function UrlList({user, handleRemove, handleDetails, setAlert, editTinyUrlInStorage}) {
     let navigation = useNavigate();
+    let urls = localStorage.hasOwnProperty('urls') ? JSON.parse(localStorage.getItem('urls')) : [];
 
     const handleSave = (url) => {
         url['user_id'] = user.id;

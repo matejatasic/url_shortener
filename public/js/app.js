@@ -2301,7 +2301,6 @@ function App() {
         }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)(react_router_dom__WEBPACK_IMPORTED_MODULE_9__.Route, {
           path: "/url-list",
           element: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_8__.jsx)(_UrlList__WEBPACK_IMPORTED_MODULE_4__["default"], {
-            urls: urls,
             user: user,
             handleRemove: handleRemove,
             handleDetails: handleDetails,
@@ -3024,13 +3023,13 @@ function _typeof(obj) { "@babel/helpers - typeof"; return _typeof = "function" =
 
 
 function UrlList(_ref) {
-  var urls = _ref.urls,
-      user = _ref.user,
+  var user = _ref.user,
       handleRemove = _ref.handleRemove,
       handleDetails = _ref.handleDetails,
       setAlert = _ref.setAlert,
       editTinyUrlInStorage = _ref.editTinyUrlInStorage;
   var navigation = (0,react_router_dom__WEBPACK_IMPORTED_MODULE_3__.useNavigate)();
+  var urls = localStorage.hasOwnProperty('urls') ? JSON.parse(localStorage.getItem('urls')) : [];
 
   var handleSave = function handleSave(url) {
     url['user_id'] = user.id;
