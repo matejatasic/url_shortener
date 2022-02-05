@@ -121,7 +121,7 @@ class UrlController extends Controller
 
     public function getDBUrls(Request $request) {
         $todayDate = date("Y-m-d");
-        $urlsForDeletion = Url::where('user_id', $request->user_id)->whereNotNull('expiration_date')->where('expiration_date', '>=', $todayDate);
+        $urlsForDeletion = Url::where('user_id', $request->user_id)->whereNotNull('expiration_date')->where('expiration_date', '<=', $todayDate);
         $urlsForDeletion->delete();
 
         $urls = Url::where('user_id', $request->user_id)->get();
